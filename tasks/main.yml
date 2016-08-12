@@ -1,0 +1,5 @@
+---
+
+- name: Initiate elasticsearch install process
+  include: install.yml
+

@@ -1,0 +1,75 @@
+---
+
+- block:
+  # See: https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-repositories.html
+
+  - name: Add elasticsearch APT key
+    apt_key:
+      state: present
+      url: "https://packages.elastic.co/GPG-KEY-elasticsearch"
+    when: ansible_pkg_mgr == 'apt'
+
+  - name: Add elasticsearch APT repository
+    apt_repository:
+      state: present
+      repo: "deb https://packages.elastic.co/elasticsearch/2.x/debian stable main"
+# added in ansible 2.1
+#     filename: "elasticsearch-{{ elasticsearch_major_version }}.x"
+    when: ansible_pkg_mgr == 'apt'
+
+  - name: Ensure elasticsearch is installed
+    apt:  state=present pkg=elasticsearch
+    when: ansible_pkg_mgr == 'apt'
+
+  # --------------------------------------------------------------------------
+
+  - name: Ensure libselinux-python is installed
+    yum:  state=present pkg=libselinux-python
+    when: "ansible_os_family == 'RedHat'"
+
+  - name: Add elasticsearch RPM key
+    rpm_key:
+      state: present
+      key: "https://packages.elastic.co/GPG-KEY-elasticsearch"
+    when: ansible_pkg_mgr == 'yum'
+
+  - name: Add elasticsearch YUM repository
+    template:
+      src: elasticsearch.repo.j2
+      dest: "/etc/yum.repos.d/elasticsearch-{{ elasticsearch_major_version }}.x.repo"
+    when: ansible_pkg_mgr == 'yum'
+
+# added in ansible 2.1
+# - name: Add elasticsearch YUM repository
+#   yum_repository:
+#     state: present
+#     name: "elasticsearch-{{ elasticsearch_major_version }}.x"
+#     description: "Elasticsearch repository for {{ elasticsearch_major_version }}.x packages"
+#     baseurl: "https://packages.elastic.co/elasticsearch/2.x/centos"
+#     gpgkey: "https://packages.elastic.co/GPG-KEY-elasticsearch"
+#     gpgcheck: yes
+#     enabled: yes
+#   when: ansible_pkg_mgr == 'yum'
+
+  - name: Ensure elasticsearch is installed
+    yum:  state=present pkg=elasticsearch
+    when: ansible_pkg_mgr == 'yum'
+
+  become: yes
+
+# TODO: https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration.html
+
+- name: Configure Elasticsearch.
+  template:
+    src: elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    owner: root
+    group: elasticsearch
+    mode: 0750
+  become: yes
+  notify: restart elasticsearch
+
+- name: Start elasticsearch when boot
+  service: state=started name=elasticsearch
+  become: yes
+

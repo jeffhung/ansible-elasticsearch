@@ -1,0 +1,5 @@
+---
+- name: restart elasticsearch
+  service: state=restarted name=elasticsearch
+  become: yes
+
