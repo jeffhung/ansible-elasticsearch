@@ -12,7 +12,7 @@
   - name: Add elasticsearch APT repository
     apt_repository:
       state: present
-      repo: "deb https://packages.elastic.co/elasticsearch/2.x/debian stable main"
+      repo: "deb https://packages.elastic.co/elasticsearch/{{ elasticsearch_major_version }}.x/debian stable main"
 # added in ansible 2.1
 #     filename: "elasticsearch-{{ elasticsearch_major_version }}.x"
     when: ansible_pkg_mgr == 'apt'
