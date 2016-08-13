@@ -59,7 +59,7 @@
 
 # TODO: https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration.html
 
-- name: Configure Elasticsearch.
+- name: Configure elasticsearch
   template:
     src: elasticsearch.yml.j2
     dest: /etc/elasticsearch/elasticsearch.yml
